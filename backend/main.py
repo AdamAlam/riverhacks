@@ -1,46 +1,64 @@
-from fastapi import FastAPI
-from openai import OpenAI
-import os
+from typing import Annotated
+from fastapi.responses import HTMLResponse
+from sqlalchemy.orm import Session
 
-# api_key = os.getenv("OPENAI_API_KEY")
-# print(api_key)
-
-
-client = OpenAI(
-    # This is the default and can be omitted
-    api_key="<KEY HERE>"
+from db.models import User
+from db.session import SessionLocal
+from fastapi import (
+    Cookie,
+    Depends,
+    FastAPI,
+    Query,
+    WebSocket,
+    WebSocketException,
+    status,
 )
+
+
+def get_db():
+    """
+    Dependency that provides a SQLAlchemy session for interacting with the database.
+    It automatically handles session closing.
+
+    Yields:
+        Session: SQLAlchemy session.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI()
 
+connected_users = {}
 
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
+messages = []
 
-@app.get("/generate_headlines/{year}", response_model=list[str])
-async def generate_headlines(year: int):
-    # prompt = f"Generate five different news headlines for the year {year}:"
-    # try:
-    #     response = openai.Completion.create(
-    #         engine="text-davinci-002",  # Or another suitable model
-    #         prompt=prompt,
-    #         max_tokens=100,
-    #         n=5,
-    #         stop="\n",
-    #     )
-    #     headlines = [choice["text"].strip() for choice in response.choices]
-    #     return headlines
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=str(e))
-    chat_completion = client.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": "Say this is a test",
-            }
-        ],
-        model="gpt-3.5-turbo",
-    )
-    return chat_completion
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(
+    websocket: WebSocket,
+    user_id: str
+):
+    await websocket.accept()
+    connected_users[user_id] = websocket
+    print("You're connected to a websocket")
+
+    while True:
+        data = await websocket.receive_text()
+        messages.append({"user_id": user_id, "message": data})
+        await websocket.send_text(f"Message text was: {data}, for item ID: {user_id}")
+
+@app.get("/allUsers")
+async def get_all_users(db: Session = Depends(get_db)):
+
+    db_response = db.query(User).all()
+    return db_response
+
+if __name__ == "__main__":
+    import uvicorn
+

@@ -9,6 +9,7 @@ import IdentityTheft from "./IdentityTheft";
 import WebDirectory from "./WebDirectory";
 import Services from "./Services";
 import MessengerAd from "./MessengerAd";
+import { Input } from "@/components/ui/input";
 
 interface Props {
   sportHeadlines: string[];
@@ -29,19 +30,11 @@ function HomePage({
   const [yearInput, setYearInput] = useState("");
   return (
     <main className="flex justify-center w-[100vw] px-[20%]">
-      <div className="w-[100%] h-[100%]">
+      <div className="w-[100%] h-[100%] flex flex-col">
         <Navbar />
         <Search />
-        <form onSubmit={handleSubmit}>
-          <input
-            className="border border-black"
-            value={yearInput}
-            type="number"
-            onChange={(e) => setYearInput(e.target.value)}
-          />
-          <button type="submit">Submit</button>
-        </form>
-        <div className="flex h-[500px]">
+
+        <div className="flex">
           <div className="w-[65%] mr-2 pt-2">
             <LeftContent
               headlines={entertainmentHeadlines}
@@ -63,6 +56,20 @@ function HomePage({
             <Music year={year} />
             <MarketPlace year={year} />
           </div>
+        </div>
+        <div className="flex justify-center w-[100%]">
+          <form onSubmit={handleSubmit}>
+            <input
+              className="border border-black mr-4 p-1"
+              value={yearInput}
+              type="number"
+              onChange={(e) => setYearInput(e.target.value)}
+              placeholder="Change Year"
+            />
+            <button type="submit" className="border border-black p-1">
+              Submit
+            </button>
+          </form>
         </div>
       </div>
     </main>

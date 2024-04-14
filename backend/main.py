@@ -5,7 +5,7 @@ import requests
 from core.config import settings
 
 
-origins = ["http://localhost:3000"]
+origins = ["*"]
 
 
 client = OpenAI(

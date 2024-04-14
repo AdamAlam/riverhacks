@@ -5,14 +5,10 @@ import News from "./components/News";
 import Search from "./components/Search";
 import LeftContent from "./components/LeftContent";
 import axios from "axios";
+import HomePage from "./components/HomePage";
 
 export default function Home() {
   const [year, setYear] = useState<number>(2005);
-  const [yearInput, setYearInput] = useState("");
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setYear(parseInt(yearInput));
-  };
 
   const [entertainmentHeadlines, setEntertainmentHeadlines] = useState<
     string[]
@@ -20,49 +16,46 @@ export default function Home() {
   const [sportHeadlines, setSportHeadlines] = useState<string[]>([]);
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:8000/entertainment/${year}`)
-      .then((res) => JSON.parse(res.data))
-      .then((data) => setEntertainmentHeadlines(data.headlines));
+    const fetchHeadlines = async () => {
+      const entertainmentData = localStorage.getItem("entertainmentHeadlines");
+      const sportsData = localStorage.getItem("sportHeadlines");
+      const lastYear = localStorage.getItem("year");
 
-    axios
-      .get(`http://localhost:8000/sports/${year}`)
-      .then((res) => JSON.parse(res.data))
-      .then((data) => setSportHeadlines(data.headlines));
+      if (entertainmentData && lastYear === year.toString()) {
+        setEntertainmentHeadlines(JSON.parse(entertainmentData));
+      } else {
+        const res = await axios.get(
+          `http://localhost:8000/entertainment/${year}`
+        );
+        const data = JSON.parse(res.data);
+        setEntertainmentHeadlines(data.headlines);
+        localStorage.setItem(
+          "entertainmentHeadlines",
+          JSON.stringify(data.headlines)
+        );
+        localStorage.setItem("year", year.toString());
+      }
+
+      if (sportsData && lastYear === year.toString()) {
+        setSportHeadlines(JSON.parse(sportsData));
+      } else {
+        const res = await axios.get(`http://localhost:8000/sports/${year}`);
+        const data = JSON.parse(res.data);
+        setSportHeadlines(data.headlines);
+        localStorage.setItem("sportHeadlines", JSON.stringify(data.headlines));
+        localStorage.setItem("year", year.toString());
+      }
+    };
+
+    fetchHeadlines();
   }, [year]);
 
   return (
-    <main className="flex justify-center w-[100vw] px-[20%]">
-      <div className="w-[100%] h-[100%]">
-        <Navbar />
-        <Search />
-        <form onSubmit={handleSubmit}>
-          <input
-            className="border border-black"
-            value={yearInput}
-            type="number"
-            onChange={(e) => setYearInput(e.target.value)}
-          />
-          <button type="submit">Submit</button>
-        </form>
-        <div className="flex h-[500px]">
-          <div className="w-[65%] mr-2 pt-2">
-            <LeftContent
-              headlines={entertainmentHeadlines}
-              title="Entertainment"
-              year={year}
-            />
-            <LeftContent
-              headlines={sportHeadlines}
-              title="Sports"
-              year={year}
-            />
-          </div>
-          <div className="w-[35%] pt-2">
-            <News year={year} />
-          </div>
-        </div>
-      </div>
-    </main>
+    <HomePage
+      sportHeadlines={sportHeadlines}
+      entertainmentHeadlines={entertainmentHeadlines}
+      year={year}
+      setYear={setYear}
+    />
   );
 }

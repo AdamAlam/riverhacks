@@ -5,15 +5,12 @@ import requests
 from core.config import settings
 
 
-# api_key = os.getenv("OPENAI_API_KEY")
-# print(api_key)
-
 origins = ["http://localhost:3000"]
 
 
 client = OpenAI(
     # This is the default and can be omitted
-    api_key=""
+    api_key=settings.OPEN_AI_KEY,
 )
 
 
@@ -39,11 +36,6 @@ def start_application() -> FastAPI:
 
 
 app = start_application()
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
 
 
 @app.get("/news/{year}")
@@ -114,9 +106,9 @@ async def get_image(headline: str, year: int):
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
         "q": headline + " " + str(year),
-        "cx": "",  # TODO: This is my custom search engine API Key Remove this.
+        "cx": "e44cc2530369a4c11",
         "searchType": "image",
-        "key": "",  # TODO: This is my GCP API Key, Remove this.
+        "key": settings.GCP_KEY,
         "num": 5,
     }
     response = requests.get(url, params=params)

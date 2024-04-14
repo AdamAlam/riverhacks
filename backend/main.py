@@ -1,10 +1,13 @@
-from typing import Annotated, Dict
+from datetime import datetime
+from typing import Annotated, Dict, List
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
-from db.models import User
+from db import schemas
+
+from db.models import User, Message
 from db.session import SessionLocal
 from fastapi import (
     Cookie,
@@ -14,7 +17,7 @@ from fastapi import (
     Query,
     WebSocket,
     WebSocketException,
-    status,
+    status, HTTPException,
 )
 
 
@@ -104,6 +107,51 @@ async def root():
 async def chatting():
     return HTMLResponse(html)
 
+@app.post("/messages/", response_model=schemas.MessageCreate)
+async def create_message(message: schemas.MessageCreate, db: Session = Depends(get_db)):
+    new_message = Message(
+        from_user_id=message.from_user_id,
+        to_user_id=message.to_user_id,
+        content=message.content,
+        sent_time=datetime.now()
+    )
+    db.add(new_message)
+    try:
+        db.commit()
+        db.refresh(new_message)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        ) from e
+    return new_message
+
+
+@app.get("/user_id/{username}", response_model=schemas.UserResponse)
+def get_userid_by_username(username: str, db: Session = Depends(get_db)):
+    user_id = db.query(User.user_id).filter(User.username == username).one_or_none()
+    if user_id is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user_id
+
+def generate_session_id(user_id1: str, user_id2: str) -> str:
+    # Sort user IDs alphabetically and concatenate them to form the session ID
+    sorted_ids = sorted([user_id1, user_id2])
+    return "_".join(sorted_ids)
+
+# read messages
+@app.get("/messages/", response_model=List[schemas.MessageResponse])
+def get_message_by_user_id(to_user_id: str, from_user_id: str, db: Session = Depends(get_db)):
+    messages = db.query(Message).filter(((Message.from_user_id == from_user_id) & (Message.to_user_id == to_user_id)) | (Message.to_user_id == from_user_id) & (Message.from_user_id == to_user_id)).all()
+    return messages
+
+@app.get("/allUsers")
+async def get_all_users(db: Session = Depends(get_db)):
+
+    db_response = db.query(User).all()
+    return db_response
+
+
 messages = []
 
 manager = ConnectionManager()
@@ -127,13 +175,3 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
     while True:
         data = await websocket.receive_text()
         await websocket.send_text(f"Message was sent: {data}")
-
-@app.get("/allUsers")
-async def get_all_users(db: Session = Depends(get_db)):
-
-    db_response = db.query(User).all()
-    return db_response
-
-if __name__ == "__main__":
-    import uvicorn
-

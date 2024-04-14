@@ -1,6 +1,6 @@
 from .session import Base
-from sqlalchemy import Column, Integer, String, ForeignKey
-
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, func
+from datetime import datetime
 
 class User(Base):
     __tablename__ = 'USER'
@@ -18,4 +18,5 @@ class Message(Base):
     message_id = Column(Integer, primary_key=True, index=True)
     from_user_id = Column(Integer, ForeignKey('USER.user_id'), nullable=False)
     to_user_id = Column(Integer, ForeignKey('USER.user_id'), nullable=False)
+    sent_time = Column(DateTime, server_default=func.now())
     content = Column(String, nullable=False)

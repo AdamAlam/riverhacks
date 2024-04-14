@@ -6,6 +6,9 @@ import Search from "./Search";
 import Music from "./Music";
 import MarketPlace from "./MarketPlace";
 import IdentityTheft from "./IdentityTheft";
+import WebDirectory from "./WebDirectory";
+import Services from "./Services";
+import MessengerAd from "./MessengerAd";
 
 interface Props {
   sportHeadlines: string[];
@@ -51,8 +54,11 @@ function HomePage({
               year={year}
             />
             <IdentityTheft />
+            <WebDirectory />
+            <Services />
           </div>
           <div className="w-[35%] pt-2">
+            <MessengerAd />
             <News year={year} />
             <Music year={year} />
             <MarketPlace year={year} />

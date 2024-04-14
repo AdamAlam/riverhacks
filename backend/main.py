@@ -5,7 +5,7 @@ import requests
 from core.config import settings
 
 
-origins = ["*"]
+origins = ["https://riverhacks-8j1siqt0v-adamalams-projects.vercel.app/"]
 
 
 client = OpenAI(

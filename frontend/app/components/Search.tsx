@@ -15,6 +15,7 @@ function Search({ inputVal, setInputVal, handleSubmit }: Props) {
           className="border border-black mr-2"
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
+          placeholder="Search Year"
         />
         <select
           name="cars"

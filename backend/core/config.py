@@ -12,6 +12,8 @@ class Settings:
     PROJECT_VERSION: str = "1.0.0"
 
     DATABASE_URL = os.getenv("SUPABASE_URL")
+    OPEN_AI_KEY = os.getenv("OPENAI_API_KEY")
+    GCP_KEY = os.getenv("GCP_KEY")
 
 
 settings = Settings()

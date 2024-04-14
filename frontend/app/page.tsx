@@ -6,9 +6,11 @@ import Search from "./components/Search";
 import LeftContent from "./components/LeftContent";
 import axios from "axios";
 import HomePage from "./components/HomePage";
+import LoadingPage from "./components/LoadingPage";
 
 export default function Home() {
-  const [year, setYear] = useState<number>(2005);
+  const [year, setYear] = useState<number>(-1);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [entertainmentHeadlines, setEntertainmentHeadlines] = useState<
     string[]
@@ -17,6 +19,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchHeadlines = async () => {
+      setLoading(true);
       const entertainmentData = localStorage.getItem("entertainmentHeadlines");
       const sportsData = localStorage.getItem("sportHeadlines");
       const lastYear = localStorage.getItem("year");
@@ -45,12 +48,22 @@ export default function Home() {
         localStorage.setItem("sportHeadlines", JSON.stringify(data.headlines));
         localStorage.setItem("year", year.toString());
       }
+      setLoading(false);
     };
-
-    fetchHeadlines();
+    if (year !== -1) {
+      fetchHeadlines();
+    }
   }, [year]);
 
-  return (
+  return loading ||
+    entertainmentHeadlines.length < 1 ||
+    sportHeadlines.length < 1 ? (
+    <LoadingPage
+      changeYear={setYear}
+      setLoading={setLoading}
+      loading={loading}
+    />
+  ) : (
     <HomePage
       sportHeadlines={sportHeadlines}
       entertainmentHeadlines={entertainmentHeadlines}

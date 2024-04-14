@@ -9,7 +9,7 @@
 - DigitalOcean (Backend Deployment)
 - Vercel (Frontend Deployment)
 
-## Starting the Fronten Locally (NextJS)
+## Starting the Frontend Locally (NextJS)
 
 - Ensure you have the `.env.local` file in the frontend directory
 

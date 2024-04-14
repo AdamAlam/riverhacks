@@ -7,6 +7,8 @@ from db.models import *
 from schema import UserCreate
 from db.session import SessionLocal
 from db.models import User
+from pydantic import BaseModel
+from auth import generate_jwt
 
 app = FastAPI()
 
@@ -30,17 +32,18 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
             detail=f'User with username {user.username} already exists.'
         )
         
-    hashed_pass = bcrypt.hashpw(user.Password.encode("utf-8"), bcrypt.gensalt()).decode(
-        "utf-8"
-    )
+    hashed_pass = bcrypt.hashpw(user.password_hash.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    
     new_user = User(
         username = user.username,
-        hash = hashed_pass,
-        created_at = user.created_at,
+        password_hash = hashed_pass,
         first_name = user.first_name,
         last_name = user.last_name,
         profile_picture_url = user.profile_picture_url
     )
+    
+    db.add(new_user)
+    db.commit()
     
 @app.post("/login/")
 def login_user(
@@ -64,27 +67,27 @@ def login_user(
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED
         )
-    JWT = generate_jwt(user.id)  # type: ignore
+    JWT = generate_jwt(user.user_id)
     return {"jwt": JWT}
 
-@app.post("/friends")
+
+@app.post("/friends/")
 def friendship_request(user_id:str, friend_id:str, db:Session = Depends(get_db)):
-    user = db.query(User).filter(User.userid==user_id).first()
-    friend = db.query(User).filter(User.userid==friend_id).first()
-    
+    user = db.query(User).filter(User.user_id == user_id).first()
+    friend = db.query(User).filter(User.user_id == friend_id).first()
+
     if not user or not friend:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User or friend not found."
+            detail="User or friend not found.",
         )
-        
-    if friend_id in user.friend:
+
+    friends_list = user.friends.split(',') if user.friends else []
+    if friend_id in friends_list:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"User {user.username} already friend with {friend.username}.",
         )
-    
-    user.friends.append(friend_id)
-    db.commit()
-    
-    return {"message":f"{user.username}, friendship with {friend.username} succesfuly created."}
+
+    friends_list.append(friend_id)
+    user.friends = ','.join(friends_list)

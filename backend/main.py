@@ -53,7 +53,7 @@ html = '''
 
         ws.onmessage = function (event) {
             const outputDiv = document.getElementById("output");
-            outputDiv.innerHTML += `<p>Received: ${event.data}</p>`;
+            outputDiv.innerHTML += `<p>${event.data}</p>`;
         };
 
         function sendMessage() {
@@ -67,23 +67,30 @@ html = '''
 </html>
 '''
 
+me = "user1"
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: list[WebSocket] = []
+        self.ws_connections: Dict[str, WebSocket] = {}
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, user_id: str):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        uuid = me + user_id
+        self.ws_connections[uuid] = websocket
 
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
+    def disconnect(self, websocket: WebSocket, user_id: str):
+        uuid = me + user_id
+        del self.ws_connections[uuid]
+    async def send_personal_message(self, message: str, user_id: str):
+        uuid = me + user_id
+        if uuid in self.ws_connections:
+            await self.ws_connections[uuid].send_text(message)
+        else:
+            print("User not connected")
 
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
+    # async def broadcast(self, message: str):
+    #     for connection in self.active_connections:
+    #         await connection.send_text(message)
 
 app = FastAPI()
 
@@ -100,17 +107,19 @@ async def chatting():
 messages = []
 
 manager = ConnectionManager()
-@app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    await manager.connect(websocket)
+@app.websocket("/ws/{user_id}")
+# user_id sent from the client will be used for combination of user_id in current user (cookie...)
+# it's going to create unique web socket for two people
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    await manager.connect(websocket, user_id)
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{client_id} says: {data}")
+            await manager.send_personal_message(f"You wrote: {data}", user_id)
+            # await manager.broadcast(f"{user_id} says: {data}")
     except WebSocketException:
         manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} disconnected")
+        # await manager.broadcast(f"{user_id} disconnected")
 
 
 

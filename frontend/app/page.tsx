@@ -27,9 +27,7 @@ export default function Home() {
       if (entertainmentData && lastYear === year.toString()) {
         setEntertainmentHeadlines(JSON.parse(entertainmentData));
       } else {
-        const res = await axios.get(
-          `http://137.184.0.116:8080/entertainment/${year}`
-        );
+        const res = await axios.get(`/api/entertainment/${year}`);
         const data = JSON.parse(res.data);
         setEntertainmentHeadlines(data.headlines);
         localStorage.setItem(
@@ -42,7 +40,7 @@ export default function Home() {
       if (sportsData && lastYear === year.toString()) {
         setSportHeadlines(JSON.parse(sportsData));
       } else {
-        const res = await axios.get(`http://137.184.0.116:8080/sports/${year}`);
+        const res = await axios.get(`/api/sports/${year}`);
         const data = JSON.parse(res.data);
         setSportHeadlines(data.headlines);
         localStorage.setItem("sportHeadlines", JSON.stringify(data.headlines));

@@ -14,7 +14,7 @@ function Music({ year }: Props) {
       if (musicData && lastYear === year.toString()) {
         setMusic(JSON.parse(musicData));
       } else {
-        const res = await axios.get(`http://137.184.0.116:8080/music/${year}`);
+        const res = await axios.get(`/api/music/${year}`);
         const data = JSON.parse(res.data);
         setMusic(data.songs);
         localStorage.setItem("music", JSON.stringify(data.songs));

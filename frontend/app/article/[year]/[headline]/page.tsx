@@ -9,7 +9,7 @@ function Article({ params }: { params: { year: number; headline: string } }) {
   const { year, headline } = params;
   const [article, setArticle] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const baseUrl = "http://137.184.0.116:8080";
+  const baseUrl = "/api";
   const encodedTopic = encodeURIComponent(headline);
   const [progress, setProgress] = useState(0);
 
@@ -23,9 +23,7 @@ function Article({ params }: { params: { year: number; headline: string } }) {
         setArticleDate(data.date);
       })
       .then(() => {
-        return axios.get(
-          `http://137.184.0.116:8080/get-image?headline=${headline}&year=${year}`
-        );
+        return axios.get(`/api/get-image?headline=${headline}&year=${year}`);
       })
       .then((res) => setImageUrls(res.data));
   }, [year, headline, encodedTopic]);

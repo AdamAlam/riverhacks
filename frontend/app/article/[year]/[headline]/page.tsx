@@ -47,8 +47,11 @@ function Article({ params }: { params: { year: number; headline: string } }) {
                 </h1>
                 <p className="text-[10px] mb-2">{articleDate}</p>
               </div>
-              <div className="flex items-center justify-center">
-                <img src={imageUrls[0]} />
+              <div className="flex items-center justify-center max-h-[500px]">
+                <img
+                  src={imageUrls[0]}
+                  className="object-contain max-h-[500px]"
+                />
               </div>
 
               <p className="mt-4 font-[verdana] text-sm">{article}</p>

@@ -1,13 +1,13 @@
 "use client";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Input } from "./../../components/ui/input";
 import { BackgroundGradientAnimation } from "./ui/background-gradient-animation.tsx";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient.tsx";
 import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 
 interface Props {
-  changeYear: (year: string) => void;
-  setLoading: (loading: boolean) => void;
+  changeYear: Dispatch<SetStateAction<number>>;
+  setLoading: Dispatch<SetStateAction<boolean>>;
   loading: boolean;
 }
 function LoadingPage({ changeYear, setLoading, loading }: Props) {
@@ -26,16 +26,16 @@ function LoadingPage({ changeYear, setLoading, loading }: Props) {
     },
   ];
 
-  const [year, setYear] = useState("2005");
+  const [year, setYear] = useState("");
 
-  const handleChange = (e) => {
-    setYear(e.target.value);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    changeYear(Number(year));
+    setLoading(true);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    changeYear(year);
-    setLoading(true);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setYear(e.target.value);
   };
   return (
     <BackgroundGradientAnimation>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, useState } from "react";
 import LeftContent from "./LeftContent";
 import Navbar from "./Navbar";
 import News from "./News";
@@ -14,7 +14,7 @@ interface Props {
   sportHeadlines: string[];
   entertainmentHeadlines: string[];
   year: number;
-  setYear: (year: number) => void;
+  setYear: Dispatch<number>;
 }
 function HomePage({
   sportHeadlines,

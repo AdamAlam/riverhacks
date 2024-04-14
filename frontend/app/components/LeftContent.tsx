@@ -21,7 +21,7 @@ function LeftContent({ headlines, title, year }: Props) {
       <div className="text-[10px] p-2">
         <ul className="list-disc list-inside leading-3">
           {headlines?.map((headline, index) => (
-            <li key={index}>
+            <li key={index} className="text-blue-800 hover:underline">
               <Link href={`/article/${year}/${encodeURIComponent(headline)}`}>
                 {headline}
               </Link>

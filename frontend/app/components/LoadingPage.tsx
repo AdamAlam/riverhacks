@@ -1,9 +1,8 @@
 "use client";
+import { MultiStepLoader } from "./../../components/ui/multi-step-loader";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Input } from "./../../components/ui/input";
 import { BackgroundGradientAnimation } from "./ui/background-gradient-animation.tsx";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient.tsx";
-import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 
 interface Props {
   changeYear: Dispatch<SetStateAction<number>>;
@@ -30,7 +29,9 @@ function LoadingPage({ changeYear, setLoading, loading }: Props) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    changeYear(Number(year));
+    let curYear = Number(year);
+    curYear = Math.max(1800, curYear);
+    changeYear(curYear);
     setLoading(true);
   };
 
@@ -57,6 +58,7 @@ function LoadingPage({ changeYear, setLoading, loading }: Props) {
             type="number"
             onChange={handleChange}
             value={year}
+            placeholder="1215-Future"
           />
         </form>
       </div>

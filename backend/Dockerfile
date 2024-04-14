@@ -1,6 +1,7 @@
 # Use a slim Python 3.12 runtime as a base image
 FROM python:3.12-slim-bullseye
 
+
 # Set the working directory in the container to /app
 WORKDIR /app
 

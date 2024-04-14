@@ -15,20 +15,24 @@ function News({ year }: Props) {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:8000/generate_headlines/${year}`)
+      .get(`http://localhost:8000/news/${year}?`)
       .then((res) => JSON.parse(res.data))
       .then((data) => setHeadlines(data.headlines))
       .then(() => setLoading(false));
   }, [year]);
   return (
-    <div>
-      {loading || headlines.length < 1 ? null : (
-        <ul>
-          {headlines.map((headline, index) => (
+    <div className="text-sm w-[100%] border border-[#9574c9]">
+      <div className="bg-[#9574c9] text-white px-2 flex justify-between">
+        <p className="font-semibold">In the News</p>
+        <p className="text-[10px]">{year}</p>
+      </div>
+      <div className="text-[10px] bg-[#f1f1fc] p-2">
+        <ul className="list-disc list-inside leading-3">
+          {headlines?.map((headline, index) => (
             <li key={index}>{headline}</li>
           ))}
         </ul>
-      )}
+      </div>
     </div>
   );
 }

@@ -28,7 +28,7 @@ export default function Home() {
         setEntertainmentHeadlines(JSON.parse(entertainmentData));
       } else {
         const res = await axios.get(
-          `http://localhost:8000/entertainment/${year}`
+          `http://137.184.0.116:8080/entertainment/${year}`
         );
         const data = JSON.parse(res.data);
         setEntertainmentHeadlines(data.headlines);
@@ -42,7 +42,7 @@ export default function Home() {
       if (sportsData && lastYear === year.toString()) {
         setSportHeadlines(JSON.parse(sportsData));
       } else {
-        const res = await axios.get(`http://localhost:8000/sports/${year}`);
+        const res = await axios.get(`http://137.184.0.116:8080/sports/${year}`);
         const data = JSON.parse(res.data);
         setSportHeadlines(data.headlines);
         localStorage.setItem("sportHeadlines", JSON.stringify(data.headlines));

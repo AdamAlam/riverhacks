@@ -21,7 +21,7 @@ function News({ year }: Props) {
       if (newsData && lastYear === year.toString()) {
         setHeadlines(JSON.parse(newsData));
       } else {
-        const res = await axios.get(`http://localhost:8000/news/${year}`);
+        const res = await axios.get(`http://137.184.0.116:8080/news/${year}`);
         const data = JSON.parse(res.data);
         setHeadlines(data.headlines);
         localStorage.setItem("newsHeadlines", JSON.stringify(data.headlines));
